@@ -1,0 +1,27 @@
+<!doctype html>
+
+<html>
+<head>
+    <title>Device Motion and Orientation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+<h1>test ws</h1>
+
+</body>
+<script src="assets/js/nes/dist/client.js"></script>
+<script>
+  const Nes = window.nes;
+  let client = new Nes.Client('ws://0.0.0.0:8080');
+
+  const start = async () => {
+
+    await client.connect();
+    let payload = await client.request('/api/status');
+    console.log(payload);
+  };
+
+  start();
+</script>
+</html>

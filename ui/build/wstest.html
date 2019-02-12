@@ -1,0 +1,74 @@
+<!doctype html>
+
+<html>
+  <head>
+    <title>Device Motion and Orientation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+
+  <body>
+    <h1>test ws</h1>
+
+  </body>
+  <!--<script src="assets/js/nes/dist/client.js"></script>-->
+  <!--<script>-->
+    <!--const Nes = window.nes;-->
+    <!--let client = new Nes.Client('ws://0.0.0.0:8080');-->
+
+    <!--const start = async () => {-->
+
+      <!--await client.connect();-->
+      <!--const payload = await client.request('hello');  // Can also request '/h'-->
+      <!--// payload -> 'world!'-->
+      <!--console.log(payload);-->
+    <!--};-->
+
+    <!--start();-->
+  <!--</script>-->
+
+    <script>
+      // Create WebSocket connection.
+      const socket = new WebSocket('ws://localhost:8080');
+      const userSessionId = new Date().getTime();
+
+      const hello = {
+        type: 'hello',
+        id: userSessionId,
+        version: '2'
+      };
+
+      // const msg = {
+      //   type: 'request',
+      //   id: userSessionId,
+      //   method: 'GET',
+      //   path: '/h'
+      // };
+
+      // const msg = {
+      //   type: 'request',
+      //   id: userSessionId,
+      //   method: 'GET',
+      //   path: 'hello'
+      // };
+
+      const msg = {
+        type: 'request',
+        id: userSessionId,
+        method: 'GET',
+        path: '/api/status' //can be a path or an id
+      };
+
+
+      // Connection opened
+      socket.addEventListener('open', function (event) {
+        //init with hello
+        socket.send(JSON.stringify(hello));
+        setInterval(() => socket.send(JSON.stringify(msg)), 5000);
+      });
+
+      // Listen for messages
+      socket.addEventListener('message', function (event) {
+        console.log('Message from server: ', event.data);
+      });
+    </script>
+</html>
