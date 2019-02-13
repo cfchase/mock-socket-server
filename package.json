@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/cfchase/mock-socket-server#readme",
   "dependencies": {
+    "aws-sdk": "^2.401.0",
     "hapi": "^18.1.0",
     "hapi-pino": "^5.4.1",
     "inert": "^5.1.2",

@@ -21,19 +21,8 @@ const init = async () => {
   await server.register(HapiPino);
   await server.register(Nes);
 
-  // server.route({
-  //   method: 'GET',
-  //   path: '/h',
-  //   config: {
-  //     id: 'hello',
-  //     handler: (request, h) => {
-  //
-  //       return {"world": request.payload};
-  //     }
-  //   }
-  // });
-
   require("./routes/api/status")(server);
+  require("./routes/api/motions")(server);
 
   server.route({
     method: "GET",
