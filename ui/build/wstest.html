@@ -7,64 +7,109 @@
   </head>
 
   <body>
-    <h1>test ws</h1>
-
+    <h1>test ws 1</h1>
+    <div>
+        <button id="start-stop-button" class="button button-primary">Start Sending</button>
+    </div>
+    <ol id="messages">
+    </ol>
   </body>
-  <!--<script src="assets/js/nes/dist/client.js"></script>-->
-  <!--<script>-->
-    <!--const Nes = window.nes;-->
-    <!--let client = new Nes.Client('ws://0.0.0.0:8080');-->
-
-    <!--const start = async () => {-->
-
-      <!--await client.connect();-->
-      <!--const payload = await client.request('hello');  // Can also request '/h'-->
-      <!--// payload -> 'world!'-->
-      <!--console.log(payload);-->
-    <!--};-->
-
-    <!--start();-->
-  <!--</script>-->
-
     <script>
       // Create WebSocket connection.
-      const socket = new WebSocket('ws://localhost:8080');
-      const sessionId = new Date().getTime();
+      try {
 
-      const hello = {
-        type: 'hello',
-        id: sessionId,
-        version: '2'
-      };
+        let uri = "ws:" + "//" + window.location.host + window.location.pathname;
+        const socket = new WebSocket(uri);
+        const sessionId = new Date().getTime();
 
-      // Connection opened
-      socket.addEventListener('open', function (event) {
-        //init with hello
-        socket.send(JSON.stringify(hello));
-        setInterval(sendMessage, 5000);
-      });
-
-      // Listen for messages
-      socket.addEventListener('message', function (event) {
-        console.log('Message from server: ', event.data);
-      });
-
-      function sendMessage() {
-        const msg = {
-          type: 'request',
+        const hello = {
+          type: 'hello',
           id: sessionId,
-          method: 'POST',
-          path: '/api/motions',
-          payload: {
-            id: new Date().getTime(),
-            sessionId,
-            data: {
-              hello: "world-" + new Date().getTime()
-            }
-          }
+          version: '2'
         };
 
-        socket.send(JSON.stringify(msg));
+        // Connection opened
+        socket.addEventListener('open', function (event) {
+          //init with hello
+          socket.send(JSON.stringify(hello));
+          setInterval(sendMotionData, 5000);
+          setInterval(sendOrientationData, 5000);
+        });
+
+        // Listen for messages
+        socket.addEventListener('message', function (event) {
+          console.log('Message from server: ', event.data);
+          writeMsg(event.data);
+        });
+
+        let sendMessagesEnabled = false;
+        const startButton = document.getElementById("start-stop-button");
+        startButton.addEventListener("click", toggleSendMessages);
+
+        function toggleSendMessages() {
+          sendMessagesEnabled = !sendMessagesEnabled;
+          if (sendMessagesEnabled) {
+            startButton.classList.add("button-stop");
+            startButton.textContent = "Stop Sending";
+          } else {
+            startButton.classList.remove("button-stop");
+            startButton.textContent = "Start Sending";
+          }
+        }
+
+        function sendMotionData() {
+          if (!sendMessagesEnabled) {
+            return;
+          }
+
+          let msg = {
+            type: 'request',
+            id: sessionId,
+            method: 'POST',
+            path: '/api/motions',
+            payload: {
+              id: new Date().getTime(),
+              sessionId,
+              data: {
+                motion: "data-" + new Date().getTime()
+              }
+            }
+          };
+
+          socket.send(JSON.stringify(msg));
+        }
+
+        function sendOrientationData() {
+          if (!sendMessagesEnabled) {
+            return;
+          }
+
+          let msg = {
+            type: 'request',
+            id: sessionId,
+            method: 'POST',
+            path: '/api/orientations',
+            payload: {
+              id: new Date().getTime(),
+              sessionId,
+              data: {
+                orientation: "data-" + new Date().getTime()
+              }
+            }
+          };
+
+          socket.send(JSON.stringify(msg));
+        }
+      }
+      catch (e) {
+        writeMsg(JSON.stringify(e));
+      }
+
+      function writeMsg(msg) {
+        const messages = document.getElementById('messages');
+        let newMessage = document.createElement('li');
+        newMessage.appendChild(document.createTextNode(msg));
+        messages.appendChild(newMessage);
       }
     </script>
 </html>

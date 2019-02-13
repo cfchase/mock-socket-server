@@ -8,19 +8,27 @@
 
 <body>
 <h1>test nes client</h1>
-
+<ol id="messages">
+</ol>
 </body>
 <script src="assets/js/nes/dist/client.js"></script>
 <script>
   const Nes = window.nes;
-  let client = new Nes.Client('ws://0.0.0.0:8080');
+  let uri = "ws:" + "//" + window.location.host + window.location.pathname;
+  let client = new Nes.Client(uri);
 
   const start = async () => {
 
     await client.connect();
-    setInterval(() => {
+    setInterval(async () => {
+        const messages = document.getElementById('messages');
         let payload = await client.request('/api/status');
         console.log(payload);
+        console.log(JSON.stringify(payload));
+        let newMessage = document.createElement('li');
+        console.log(newMessage);
+        newMessage.appendChild(document.createTextNode(JSON.stringify(payload)));
+        messages.appendChild(newMessage);
       },
       5000
     );
