@@ -7,7 +7,10 @@ handler = async (request, h) => {
 
 
   try {
-    await storage.writeJson(fileKey, data);
+    if (storage) {
+      await storage.writeJson(fileKey, data);
+    }
+
     return h.response({
       data
     }).code(201);

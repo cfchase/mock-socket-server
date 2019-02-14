@@ -2,7 +2,7 @@ const utilities = require("./utilities");
 const S3Storage = require("../s3Storage");
 
 const _init = () => {
-  let storage;
+  let storage = null;
 
   try {
 
@@ -16,7 +16,7 @@ const _init = () => {
   }
   catch (e) {
     console.error(e);
-    return {};
+    return null; //no storage configured
   }
 
   return storage;

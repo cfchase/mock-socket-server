@@ -34,14 +34,19 @@ parameters:
   required: true
 - name: S3_ENDPOINT
   required: true
+  default: ""
 - name: S3_BUCKET
   required: true
+  default: ""
 - name: S3_PREFIX
   required: true
+  default: ""
 - name: S3_ACCESS_KEY_ID
   required: true
+  default: ""
 - name: S3_SECRET_ACCESS_KEY
   required: true
+  default: ""
 
 objects:
 - apiVersion: v1

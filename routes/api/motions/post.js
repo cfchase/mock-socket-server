@@ -8,7 +8,10 @@ handler = async (request, h) => {
   console.log("motions post", request.payload);
 
   try {
-    await storage.writeJson(fileKey, data);
+    if (storage) {
+      await storage.writeJson(fileKey, data);
+    }
+
     return h.response({
       data
     }).code(201);

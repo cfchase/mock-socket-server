@@ -12,10 +12,12 @@ addGameRoutes = (server) => {
   });
 
   server.route({
-    method: ["PUT"],
+    method: ["PATCH", "PUT"],
     path: "/api/game",
-    handler: require("./put").handler,
+    handler: require("./patch").handler,
   });
+
+  server.subscription("/api/game");
 };
 
 module.exports = addGameRoutes;

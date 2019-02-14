@@ -2,8 +2,12 @@
 
 <html>
 <head>
-    <title>Device Motion and Orientation</title>
+    <title>Nes Test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <style>
+    </style>
 </head>
 
 <body>
@@ -20,18 +24,13 @@
   const start = async () => {
 
     await client.connect();
-    setInterval(async () => {
-        const messages = document.getElementById('messages');
-        let payload = await client.request('/api/status');
-        console.log(payload);
-        console.log(JSON.stringify(payload));
-        let newMessage = document.createElement('li');
-        console.log(newMessage);
-        newMessage.appendChild(document.createTextNode(JSON.stringify(payload)));
-        messages.appendChild(newMessage);
-      },
-      5000
-    );
+    const handler = (update, flags) => {
+
+      // update -> { id: 5, status: 'complete' }
+      // Second publish is not received (doesn't match)
+    };
+
+    client.subscribe('/item/5', handler);
   };
 
   start();
