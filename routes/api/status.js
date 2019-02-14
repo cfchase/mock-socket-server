@@ -10,6 +10,7 @@ handler = (server) => {
         s3Endpoint: request.server.app.storage.s3Endpoint,
         s3Bucket: request.server.app.storage.s3Bucket,
         s3Prefix: request.server.app.storage.s3Prefix,
+        game: request.server.app.game
       };
     }
   });

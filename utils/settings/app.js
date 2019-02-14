@@ -1,12 +1,13 @@
 const _init = () => {
-  const storage = require("./storage");
-
   const status = {
     status: "OK",
     started: new Date(),
   };
 
-  return {status, storage};
+  const storage = require("./storage");
+  const game = require("./game");
+
+  return {status, storage, game};
 };
 
 module.exports = _init();

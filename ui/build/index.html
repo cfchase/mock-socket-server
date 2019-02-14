@@ -230,14 +230,15 @@
   // Create WebSocket connection.
   let uri = "ws:" + "//" + window.location.host + window.location.pathname;
   let sessionId = new Date().getTime();
+  let captureId = new Date().getTime();
   const socket = new WebSocket(uri);
   const startButton = document.getElementById("start-stop-button");
   startButton.addEventListener("click", toggleCapture);
 
   function toggleCapture() {
     captureOn = !captureOn;
+    captureId = new Date().getTime();  //new capture session
     if (captureOn) {
-      sessionId = new Date().getTime();  //new capture session
       startButton.classList.add("button-stop");
       startButton.textContent = "Stop Capture";
     } else {
@@ -254,7 +255,7 @@
       id: sessionId,
       method: 'POST',
       path: '/api/motions',
-      payload: {id, sessionId, data}
+      payload: {id, captureId, data}
     };
 
     socket.send(JSON.stringify(msg));
@@ -268,7 +269,7 @@
       id: sessionId,
       method: 'POST',
       path: '/api/orientations',
-      payload: {id, sessionId, data}
+      payload: {id, captureId, data}
     };
 
     socket.send(JSON.stringify(msg));

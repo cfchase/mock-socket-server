@@ -2,8 +2,8 @@ const storageErrorResponseBody = require("../utilities").storageErrorResponseBod
 
 handler = async (request, h) => {
   const storage = request.server.app.storage;
-  const {sessionId, id, data} = request.payload;
-  const fileKey = `motions/${sessionId}/${id}.json`;
+  const {captureId, id, data} = request.payload;
+  const fileKey = `motions/${captureId}/${id}.json`;
 
   console.log("motions post", request.payload);
 

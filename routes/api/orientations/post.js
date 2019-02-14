@@ -2,8 +2,8 @@ const storageErrorResponseBody = require("../utilities").storageErrorResponseBod
 
 handler = async (request, h) => {
   const storage = request.server.app.storage;
-  const {sessionId, id, data} = request.payload;
-  const fileKey = `orientations/${sessionId}/${id}.json`;
+  const {sessionId: captureId, id, data} = request.payload;
+  const fileKey = `orientations/${captureId}/${id}.json`;
 
 
   try {

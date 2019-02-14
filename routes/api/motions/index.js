@@ -1,4 +1,4 @@
-addOrientationRoutes = (server) => {
+addGameRoutes = (server) => {
   server.route({
     method: ["POST"],
     path: "/api/motions",
@@ -6,4 +6,4 @@ addOrientationRoutes = (server) => {
   });
 };
 
-module.exports = addOrientationRoutes;
+module.exports = addGameRoutes;

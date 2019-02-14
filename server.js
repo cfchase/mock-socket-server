@@ -24,6 +24,7 @@ const init = async () => {
   require("./routes/api/status")(server);
   require("./routes/api/motions")(server);
   require("./routes/api/orientations")(server);
+  require("./routes/api/game")(server);
 
   server.route({
     method: "GET",
