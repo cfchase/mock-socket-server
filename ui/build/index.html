@@ -136,7 +136,9 @@
   }
 
   function completeCapture() {
+    sendCapture();
     captureOn = false;
+    motionId = 0;
     clearInterval(emitterInterval);
   }
 
