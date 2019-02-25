@@ -27,7 +27,7 @@ handler = async (request, h) => {
 function getDateString() {
   const now = new Date();
   const year = '' + now.getFullYear();
-  const month = ('' + now.getMonth() + 1).padStart(2,0);
+  const month = ('' + (now.getMonth() + 1)).padStart(2,0);
   const date = ('' + now.getDate()).padStart(2,0);
 
   return `${year}-${month}-${date}`;
