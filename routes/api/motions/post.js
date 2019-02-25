@@ -3,7 +3,8 @@ const storageErrorResponseBody = require("../utilities").storageErrorResponseBod
 handler = async (request, h) => {
   const storage = request.server.app.storage;
   const {captureId, id, data} = request.payload;
-  const fileKey = `motions/${captureId}/${id}.json`;
+  const dateSubdir = getDateString();
+  const fileKey = `motions/${dateSubdir}/${captureId}/${id}.json`;
 
   console.log("motions post", request.payload);
 
@@ -22,6 +23,15 @@ handler = async (request, h) => {
     return h.response(responseBody).code(responseBody.statusCode);
   }
 };
+
+function getDateString() {
+  const now = new Date();
+  const year = '' + now.getFullYear();
+  const month = ('' + now.getMonth() + 1).padStart(2,0);
+  const date = ('' + now.getDate()).padStart(2,0);
+
+  return `${year}-${month}-${date}`;
+}
 
 module.exports.handler = handler;
 

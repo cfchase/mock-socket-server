@@ -93,6 +93,7 @@
   let captureOn = false;
   let capturedEvents;
   let emitterInterval;
+  let motionId = 0;
 
   window.addEventListener('deviceorientation', applicationInitialisationEvent, true);
 
@@ -120,7 +121,8 @@
       motion: [],
       orientation: []
     };
-    emitterInterval = setInterval(sendCapture, 1000)
+    emitterInterval = setInterval(sendCapture, 1000);
+    motionId = 0;
   }
 
   function sendCapture() {
@@ -129,7 +131,8 @@
       motion: [],
       orientation: []
     };
-    sendMotionData(data)
+    sendMotionData(motionId, data);
+    motionId = motionId + 1;
   }
 
   function completeCapture() {
@@ -277,9 +280,7 @@
     sendMessage(msg);
   }
 
-  function sendMotionData(data) {
-    const id = Date.now();
-
+  function sendMotionData(id, data) {
     const msg = {
       type: 'request',
       id: sessionId,
