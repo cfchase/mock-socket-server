@@ -91,6 +91,8 @@
   // the initial listener can somehow fire multiple times before removal
   let appInitialised = false;
   let captureOn = false;
+  let capturedEvents;
+  let emitterInterval;
 
   window.addEventListener('deviceorientation', applicationInitialisationEvent, true);
 
@@ -112,60 +114,56 @@
     window.removeEventListener('deviceorientation', applicationInitialisationEvent)
   }
 
-  function startOrientationCapture() {
-    const capturedEvents = [];
-    const startTs = new Date().getTime();
-    const endTs = startTs + captureSeconds * 1000;
-    const downloadOrientationDataBtn = document.getElementById('download-orientation');
+  function initCapture() {
+    captureOn = true;
+    capturedEvents = {
+      motion: [],
+      orientation: []
+    };
+    emitterInterval = setInterval(sendCapture, 1000)
+  }
 
+  function sendCapture() {
+    const data = capturedEvents;
+    capturedEvents = {
+      motion: [],
+      orientation: []
+    };
+    sendMotionData(data)
+  }
+
+  function completeCapture() {
+    captureOn = false;
+    clearInterval(emitterInterval);
+  }
+
+  function startOrientationCapture() {
     const oabsolute = document.getElementById('oabsolute');
     const oalpha = document.getElementById('oalpha');
     const obeta = document.getElementById('obeta');
     const ogamma = document.getElementById('ogamma');
 
     const onOrientationEvent = (e) => {
-      if (!captureOn) {
-        return
-      }
-
       oabsolute.textContent = e.absolute;
       oalpha.textContent = e.alpha.toFixed(4);
       obeta.textContent = e.beta.toFixed(4);
       ogamma.textContent = e.gamma.toFixed(4);
 
       if (captureOn) {
-        sendOrientationData({
+        capturedEvents.orientation.push({
           absolute: e.absolute,
           alpha: e.alpha,
           beta: e.beta,
           gamma: e.gamma,
-          ts: Date.now()
+          timestamp: Date.now()
         })
       }
     };
-
-    // setTimeout(() => {
-    //   const filename = 'orientation-events.json';
-    //   const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents));
-    //
-    //   downloadOrientationDataBtn.className = 'button button-primary';
-    //   downloadOrientationDataBtn.setAttribute('href', data);
-    //   downloadOrientationDataBtn.setAttribute('download', filename);
-    //   downloadOrientationDataBtn.setAttribute('disabled', 'false');
-    //   downloadOrientationDataBtn.textContent = 'Download Orientation JSON';
-    //
-    //   alert(`Captured ${capturedEvents.length} orientation events. JSON size is ${Math.round(JSON.stringify(capturedEvents).length / 1024)}kb. Use the button to download it.`)
-    // }, endTs - startTs);
-
 
     window.addEventListener('deviceorientation', onOrientationEvent, true)
   }
 
   function startMotionCapture() {
-    console.log("startMotionCapture");
-    const startTs = new Date().getTime();
-    const endTs = startTs + captureSeconds * 1000;
-    const downloadMotionDataBtn = document.getElementById('download-motion');
 
     const maccel = document.getElementById('maccel');
     const maccelg = document.getElementById('maccelg');
@@ -176,19 +174,29 @@
 
     // Throttle UI update to once per second (otherwise...aaaagh my eyes!)
     let updateInterval = setInterval(() => {
-      if (latestEvent) {
+      if (latestEvent && latestEvent.acceleration && latestEvent.acceleration.x !== null && latestEvent.acceleration.y !== null && latestEvent.acceleration.z !== null) {
         maccel.textContent = `${latestEvent.acceleration.x.toFixed(2)}x, ${latestEvent.acceleration.y.toFixed(2)}y, ${latestEvent.acceleration.z.toFixed(2)}z`;
+      }
+
+      if (latestEvent && latestEvent.accelerationIncludingGravity && latestEvent.accelerationIncludingGravity.x !== null && latestEvent.accelerationIncludingGravity.y !== null && latestEvent.accelerationIncludingGravity.z !== null) {
         maccelg.textContent = `${latestEvent.accelerationIncludingGravity.x.toFixed(2)}x, ${latestEvent.accelerationIncludingGravity.y.toFixed(2)}y, ${latestEvent.accelerationIncludingGravity.z.toFixed(2)}z`;
+      }
+
+      if (latestEvent && latestEvent.rotationRate && latestEvent.rotationRate.alpha !== null && latestEvent.rotationRate.beta !== null && latestEvent.rotationRate.gamma !== null) {
         mrr.textContent = `${latestEvent.rotationRate.alpha.toFixed(2)}α, ${latestEvent.rotationRate.beta.toFixed(2)}β, ${latestEvent.rotationRate.gamma.toFixed(2)}γ`;
+      }
+
+      if (latestEvent && latestEvent.interval) {
         mint.textContent = `${latestEvent.interval}ms`
       }
+
     }, 100);
 
     const onMotionEvent = (e) => {
       latestEvent = e;
 
       if (captureOn) {
-        sendMotionData({
+        capturedEvents.motion.push({
           acceleration: {
             x: latestEvent.acceleration.x,
             y: latestEvent.acceleration.y,
@@ -205,50 +213,72 @@
             gamma: latestEvent.rotationRate.gamma
           },
           interval: latestEvent.interval,
-          ts: Date.now()
+          timestamp: Date.now()
         })
       }
     };
 
-    // setTimeout(() => {
-    //   const filename = 'motion-events.json';
-    //   const data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(capturedEvents));
-    //
-    //   downloadMotionDataBtn.className = 'button button-primary';
-    //   downloadMotionDataBtn.setAttribute('href', data);
-    //   downloadMotionDataBtn.setAttribute('download', filename);
-    //   downloadMotionDataBtn.setAttribute('disabled', 'false');
-    //   downloadMotionDataBtn.textContent = 'Download Motion JSON';
-    //
-    //   alert(`Captured ${capturedEvents.length} motion events. JSON size is ${Math.round(JSON.stringify(capturedEvents).length / 1024)}kb. Use the button to download it.`)
-    // }, endTs - startTs);
-
     window.addEventListener('devicemotion', onMotionEvent, true)
   }
 
-
   // Create WebSocket connection.
   let uri = "ws:" + "//" + window.location.host + window.location.pathname;
-  let sessionId = new Date().getTime();
-  let captureId = new Date().getTime();
+  let sessionId = Date.now();
+  let captureId = Date.now();
   const socket = new WebSocket(uri);
   const startButton = document.getElementById("start-stop-button");
   startButton.addEventListener("click", toggleCapture);
 
   function toggleCapture() {
     captureOn = !captureOn;
-    captureId = new Date().getTime();  //new capture session
+    captureId = Date.now();  //new capture session
     if (captureOn) {
       startButton.classList.add("button-stop");
       startButton.textContent = "Stop Capture";
+      initCapture();
     } else {
       startButton.classList.remove("button-stop");
       startButton.textContent = "Start Capture";
+      completeCapture();
     }
   }
 
+  function sendMessage(msg) {
+    socket.send(JSON.stringify(msg));
+  }
+
+  function sendHello() {
+    const msg = {
+      type: 'hello',
+      id: sessionId,
+      version: '2'
+    };
+
+    sendMessage(msg);
+  }
+
+  function sendPing() {
+    const msg = {
+      type: 'ping',
+      id: sessionId
+    };
+
+    sendMessage(msg);
+  }
+
+  function getStatus() {
+    const msg = {
+      type: 'request',
+      id: sessionId,
+      method: 'GET',
+      path: '/api/status'
+    };
+
+    sendMessage(msg);
+  }
+
   function sendMotionData(data) {
-    const id = new Date().getTime();
+    const id = Date.now();
 
     const msg = {
       type: 'request',
@@ -258,35 +288,35 @@
       payload: {id, captureId, data}
     };
 
-    socket.send(JSON.stringify(msg));
+    sendMessage(msg);
   }
 
-  function sendOrientationData(data) {
-    const id = new Date().getTime();
+  function processMessage(message) {
+    console.log('processMessage', typeof message, message);
+    let m = JSON.parse(message);
+    switch (m.type) {
+      case "ping":
+        handlePing(m);
+        break;
+      default:
+        console.log('Unhandled message from server: ', message);
+    }
+  }
 
-    const msg = {
-      type: 'request',
-      id: sessionId,
-      method: 'POST',
-      path: '/api/orientations',
-      payload: {id, captureId, data}
-    };
-
-    socket.send(JSON.stringify(msg));
+  function handlePing() {
+    sendPing();
   }
 
   // Connection opened
   socket.addEventListener('open', function (event) {
-    socket.send(JSON.stringify({
-      type: 'hello',
-      id: sessionId,
-      version: '2'
-    }));
+    sendHello();
+    setInterval(getStatus, 5000);
   });
 
   // Listen for messages
   socket.addEventListener('message', function (event) {
     console.log('Message from server: ', event.data);
+    processMessage(event.data);
   });
 </script>
 </html>
