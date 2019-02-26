@@ -235,9 +235,9 @@
   startButton.addEventListener("click", toggleCapture);
 
   function toggleCapture() {
-    captureOn = !captureOn;
-    captureId = Date.now();  //new capture session
-    if (captureOn) {
+    if (!captureOn) {
+      captureOn = true;
+      captureId = Date.now();  //new capture session
       startButton.classList.add("button-stop");
       startButton.textContent = "Stop Capture";
       initCapture();
@@ -245,6 +245,7 @@
       startButton.classList.remove("button-stop");
       startButton.textContent = "Start Capture";
       completeCapture();
+      captureOn = false;
     }
   }
 
